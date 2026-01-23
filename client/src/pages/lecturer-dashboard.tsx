@@ -157,12 +157,12 @@ export default function LecturerDashboard() {
                   <Plus className="w-5 h-5 mr-2" /> Start New Session
                 </Button>
               </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Start Attendance Session</DialogTitle>
-                <DialogDescription>Set location and range for student verification.</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6 py-4">
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Start Attendance Session</DialogTitle>
+                  <DialogDescription>Set location and range for student verification.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
                 <div className="space-y-2">
                   <Label>Select Course</Label>
                   <Select onValueChange={setSelectedCourse}>

@@ -110,6 +110,12 @@ export type Course = typeof courses.$inferSelect;
 export type AttendanceSession = typeof attendanceSessions.$inferSelect;
 export type AttendanceRecord = typeof attendanceRecords.$inferSelect;
 
+export type InsertStudent = z.infer<typeof insertStudentSchema>;
+export type InsertLecturer = z.infer<typeof insertLecturerSchema>;
+export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type InsertSession = z.infer<typeof insertSessionSchema>;
+export type InsertRecord = z.infer<typeof insertRecordSchema>;
+
 // Auth Types
 export const loginSchema = z.object({
   username: z.string(), // Index Number for students, Username for lecturers
