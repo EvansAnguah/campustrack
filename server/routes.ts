@@ -265,6 +265,31 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
      res.json(records);
   });
 
+  app.post(api.students.import.path, requireAuth, requireLecturer, async (req, res) => {
+    try {
+      const { students: studentData } = api.students.import.input.parse(req.body);
+      let added = 0;
+      let updated = 0;
+      let skipped = 0;
+      const errors: string[] = [];
+
+      for (const data of studentData) {
+        try {
+          const result = await storage.upsertStudent(data.indexNumber, data.name);
+          if (result.type === 'added') added++;
+          else if (result.type === 'updated') updated++;
+          else skipped++;
+        } catch (err) {
+          errors.push(`Failed to import ${data.indexNumber}: ${(err as Error).message}`);
+        }
+      }
+
+      res.json({ added, updated, skipped, errors });
+    } catch (err) {
+      res.status(400).json({ message: "Invalid student data format" });
+    }
+  });
+
   // === SEED DATA ===
   await seedDatabase();
 

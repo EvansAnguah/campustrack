@@ -157,7 +157,28 @@ export const api = {
         })),
       },
     }
-  }
+  },
+  students: {
+    import: {
+      method: 'POST' as const,
+      path: '/api/students/import',
+      input: z.object({
+        students: z.array(z.object({
+          name: z.string(),
+          indexNumber: z.string(),
+        })),
+      }),
+      responses: {
+        200: z.object({
+          added: z.number(),
+          updated: z.number(),
+          skipped: z.number(),
+          errors: z.array(z.string()),
+        }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
 };
 
 export function buildUrl(path: string, params?: Record<string, string | number>): string {

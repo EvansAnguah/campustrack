@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function LecturerDashboard() {
   const { user } = useAuth();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
 
   // Queries & Mutations
@@ -34,6 +35,54 @@ export default function LecturerDashboard() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const { toast } = useToast();
+
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target?.result as string;
+      const lines = text.split('\n');
+      const students: { name: string; indexNumber: string }[] = [];
+      
+      // Basic CSV parsing
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const [name, index] = line.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+        if (name && index) {
+          students.push({ name, indexNumber: index });
+        }
+      }
+
+      if (students.length === 0) {
+        toast({ title: "Import Failed", description: "No valid student records found in CSV", variant: "destructive" });
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/students/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ students }),
+        });
+        
+        if (!res.ok) throw new Error("Import failed");
+        
+        const result = await res.json();
+        toast({ 
+          title: "Import Complete", 
+          description: `Added: ${result.added}, Updated: ${result.updated}, Skipped: ${result.skipped}`
+        });
+        setIsImportOpen(false);
+      } catch (err) {
+        toast({ title: "Error", description: (err as Error).message, variant: "destructive" });
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const handleGetLocation = () => {
     setIsLocating(true);
@@ -76,12 +125,38 @@ export default function LecturerDashboard() {
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h2>
             <p className="text-slate-500">Manage active attendance sessions.</p>
           </div>
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg" className="bg-primary shadow-lg shadow-primary/25">
-                <Plus className="w-5 h-5 mr-2" /> Start New Session
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="lg">
+                  <Users className="w-5 h-5 mr-2" /> Import Students
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Bulk Import Students</DialogTitle>
+                  <DialogDescription>Upload a CSV file with "Student Full Name" and "Index / ID Number".</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="p-4 border-2 border-dashed border-slate-200 rounded-xl text-center">
+                    <p className="text-sm text-slate-500 mb-2">CSV format: Name, IndexNumber</p>
+                    <Input 
+                      type="file" 
+                      accept=".csv" 
+                      onChange={handleImportCSV}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="bg-primary shadow-lg shadow-primary/25">
+                  <Plus className="w-5 h-5 mr-2" /> Start New Session
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Start Attendance Session</DialogTitle>

@@ -40,6 +40,7 @@ export interface IStorage {
   createUserSession(userId: number, userType: 'student' | 'lecturer', deviceId: string): Promise<void>;
   getActiveUserSession(userId: number, userType: 'student' | 'lecturer'): Promise<string | undefined>; // Returns deviceId
   invalidateUserSession(userId: number, userType: 'student' | 'lecturer'): Promise<void>;
+  upsertStudent(indexNumber: string, name: string): Promise<{ type: 'added' | 'updated' | 'skipped' }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -210,6 +211,26 @@ export class DatabaseStorage implements IStorage {
         eq(userSessions.userId, userId),
         eq(userSessions.userType, userType)
       ));
+  }
+
+  async upsertStudent(indexNumber: string, name: string): Promise<{ type: 'added' | 'updated' | 'skipped' }> {
+    const existing = await this.getStudentByIndex(indexNumber);
+    if (existing) {
+      if (existing.name !== name) {
+        await db.update(students)
+          .set({ name })
+          .where(eq(students.indexNumber, indexNumber));
+        return { type: 'updated' };
+      }
+      return { type: 'skipped' };
+    }
+
+    await db.insert(students).values({
+      indexNumber,
+      name,
+      isRegistered: false,
+    });
+    return { type: 'added' };
   }
 }
 
