@@ -1,0 +1,122 @@
+Act as a senior software engineer working inside a Replit environment.
+
+Build a web-based location-based attendance system for a tertiary institution.
+The system must be realistic, secure, simple, and explainable.
+
+==================================================
+IMPORTANT LIMITS (MUST FOLLOW)
+==================================================
+
+- Do NOT assume any specific programming language unless asked
+- Use only browser-supported capabilities and basic server logic
+- Do NOT rely on paid APIs or external services
+- Do NOT add biometric or face-recognition features
+- Do NOT auto-create student accounts
+- Do NOT invent features outside the scope below
+- If something is unclear, ask before assuming
+
+==================================================
+PROJECT GOAL
+==================================================
+
+Lecturers create attendance sessions.
+Students can mark attendance ONLY when they are physically present
+within a defined GPS radius during an active session.
+
+==================================================
+ACTORS
+==================================================
+
+1. Student
+2. Lecturer (Admin)
+
+==================================================
+STUDENT ACCOUNT LOGIC
+==================================================
+
+- Student records are preloaded using ONLY Index / ID Numbers
+- No passwords exist initially
+- First-time access flow:
+  - Student enters Index / ID Number
+  - System verifies the Index Number exists
+  - If no password is set:
+    - Student creates a password
+    - Password is stored securely
+    - Account becomes active
+- Returning students log in using Index Number + password
+
+==================================================
+ATTENDANCE SESSION LOGIC
+==================================================
+
+- A lecturer creates an attendance session with:
+  - Course
+  - GPS latitude and longitude
+  - Allowed radius (in meters)
+  - Start condition and end condition
+- A student may mark attendance ONLY IF:
+  - Session is active
+  - Student is authenticated
+  - Browser grants location access
+  - Student location is within the allowed radius
+
+==================================================
+DEVICE & SESSION CONTROL
+==================================================
+
+- One device may have ONLY ONE active session at a time
+- One device can not login two different account only if the session starts even when student logs out and tries to login another account
+- Device restriction is per session, not permanent
+- Use non-invasive browser or platform information to identify a device
+- If a device already has an active session:
+  - Block new login attempts from that device
+
+==================================================
+DATA STRUCTURE (STRICT)
+==================================================
+
+Use ONLY these data entities:
+
+1. Students
+2. Lecturers
+3. Courses
+4. Attendance Sessions
+5. Attendance Records
+6. User Sessions (for device/session control)
+
+- Keep schema minimal
+- Avoid unnecessary fields
+- Explain each entity clearly
+
+==================================================
+SECURITY REQUIREMENTS
+==================================================
+
+- Never store passwords in plain text
+- Validate attendance server-side
+- Prevent duplicate attendance entries
+- Protect sessions from hijacking
+- Do not trust client-side data blindly
+
+==================================================
+UI / VISUAL RULES
+==================================================
+
+- The interface should look modern and academic
+- Subtle animations are allowed
+- 3D or animated visuals may be used ONLY as background decoration
+- Visuals must NEVER control authentication or attendance logic
+
+==================================================
+WORKFLOW REQUIREMENT
+==================================================
+
+Proceed in this order:
+1. Explain the full system flow step-by-step
+2. Design the database schema
+3. Build authentication and onboarding
+4. Implement attendance logic
+5. Add UI enhancements last
+
+Do NOT jump ahead.
+
