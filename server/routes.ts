@@ -78,20 +78,20 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       // 2. Device Control Check
       const activeDeviceId = await storage.getActiveUserSession(user.id, role);
       if (activeDeviceId && activeDeviceId !== deviceId) {
-         // Strict rule: "If a device already has an active session: Block new login attempts from that device"
-         // Wait, requirement says: "One device can not login two different account only if the session starts even when student logs out and tries to login another account" - this is slightly ambiguous.
-         // Let's interpret "Block new login attempts from that device" as blocking THIS login if ANOTHER session exists.
-         // Actually, standard security is: Invalidate old session OR Block new one.
-         // Req: "If a device already has an active session: Block new login attempts from that device" - This usually means if User A is logged in on Device 1, User A cannot login on Device 2.
-         // AND "One device may have ONLY ONE active session at a time"
-         
-         // Let's go with: If user is active elsewhere, block this login.
-         return res.status(409).json({ message: "You have an active session on another device. Log out there first." });
+        // Strict rule: "If a device already has an active session: Block new login attempts from that device"
+        // Wait, requirement says: "One device can not login two different account only if the session starts even when student logs out and tries to login another account" - this is slightly ambiguous.
+        // Let's interpret "Block new login attempts from that device" as blocking THIS login if ANOTHER session exists.
+        // Actually, standard security is: Invalidate old session OR Block new one.
+        // Req: "If a device already has an active session: Block new login attempts from that device" - This usually means if User A is logged in on Device 1, User A cannot login on Device 2.
+        // AND "One device may have ONLY ONE active session at a time"
+
+        // Let's go with: If user is active elsewhere, block this login.
+        return res.status(409).json({ message: "You have an active session on another device. Log out there first." });
       }
 
       // 3. Create Session
       await storage.createUserSession(user.id, role, deviceId);
-      
+
       // Store in Express Session
       (req.session as any).user = { id: user.id, role, deviceId };
       req.session.save();
@@ -106,7 +106,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if ((req.session as any).user) {
       const { id, role } = (req.session as any).user;
       await storage.invalidateUserSession(id, role);
-      req.session.destroy(() => {});
+      req.session.destroy(() => { });
     }
     res.json({ message: "Logged out" });
   });
@@ -114,7 +114,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post(api.auth.onboard.path, async (req, res) => {
     try {
       const { indexNumber, newPassword, deviceId } = api.auth.onboard.input.parse(req.body);
-      
+
       const student = await storage.getStudentByIndex(indexNumber);
       if (!student) {
         return res.status(404).json({ message: "Index Number not found in system." });
@@ -166,15 +166,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const courses = await storage.getCourses();
     res.json(courses);
   });
-  
+
   app.post(api.courses.create.path, requireAuth, requireLecturer, async (req, res) => {
-      try {
-        const input = api.courses.create.input.parse(req.body);
-        const course = await storage.createCourse(input);
-        res.status(201).json(course);
-      } catch (err) {
-          res.status(400).json({ message: "Validation error" });
-      }
+    try {
+      const input = api.courses.create.input.parse(req.body);
+      const course = await storage.createCourse(input);
+      res.status(201).json(course);
+    } catch (err) {
+      res.status(400).json({ message: "Validation error" });
+    }
   });
 
   app.get(api.sessions.listActive.path, requireAuth, async (req, res) => {
@@ -226,8 +226,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       // 3. Validate Location (Geofence)
       const distance = getDistanceFromLatLonInM(lat, lng, parseFloat(session.latitude), parseFloat(session.longitude));
       if (distance > session.radius) {
-        return res.status(400).json({ 
-          message: `You are too far away! Distance: ${Math.round(distance)}m. Allowed: ${session.radius}m.` 
+        return res.status(400).json({
+          message: `You are too far away! Distance: ${Math.round(distance)}m. Allowed: ${session.radius}m.`
         });
       }
 
@@ -247,22 +247,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       res.status(201).json(record);
     } catch (err) {
-       console.error(err);
-       res.status(500).json({ message: "Failed to mark attendance" });
+      console.error(err);
+      res.status(500).json({ message: "Failed to mark attendance" });
     }
   });
-  
+
   app.get(api.attendance.history.path, requireAuth, async (req, res) => {
-      const user = req.session.user;
-      if (user.role !== 'student') return res.status(403).json({ message: "Students only" });
-      const history = await storage.getStudentHistory(user.id);
-      res.json(history);
+    const user = req.session.user;
+    if (user.role !== 'student') return res.status(403).json({ message: "Students only" });
+    const history = await storage.getStudentHistory(user.id);
+    res.json(history);
   });
 
   app.get(api.attendance.report.path, requireAuth, requireLecturer, async (req, res) => {
-     const sessionId = parseInt(req.params.sessionId);
-     const records = await storage.getSessionRecords(sessionId);
-     res.json(records);
+    const sessionId = parseInt(req.params.sessionId);
+    const records = await storage.getSessionRecords(sessionId);
+    res.json(records);
   });
 
   app.post(api.students.import.path, requireAuth, requireLecturer, async (req, res) => {
@@ -293,7 +293,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.get(api.students.listWithStatus.path, requireAuth, requireLecturer, async (req, res) => {
     const statuses = await storage.getRecentAttendanceStatuses();
     const students = await storage.getAllStudents();
-    
+
     const result = students.map(student => {
       const statusData = statuses.find(s => s.studentId === student.id);
       return {
@@ -302,7 +302,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         lastSessionId: statusData?.sessionId
       };
     });
-    
+
     res.json(result);
   });
 
@@ -334,7 +334,7 @@ async function seedDatabase() {
   const students = await storage.getStudentByIndex("ST001");
   if (!students) {
     console.log("Seeding database...");
-    
+
     // Seed Lecturers
     const lectPass = await hashPassword("admin123");
     await storage.createLecturer({
@@ -342,21 +342,21 @@ async function seedDatabase() {
       password: lectPass,
       name: "Professor John Doe"
     });
-    
+
     const lecturer = await storage.getLecturerByUsername("prof.doe");
-    
+
     if (lecturer) {
-        // Seed Courses
-        await storage.createCourse({
-          code: "CS101",
-          name: "Intro to Computer Science",
-          lecturerId: lecturer.id
-        });
-        await storage.createCourse({
-          code: "ENG202",
-          name: "Advanced Engineering",
-          lecturerId: lecturer.id
-        });
+      // Seed Courses
+      await storage.createCourse({
+        code: "CS101",
+        name: "Intro to Computer Science",
+        lecturerId: lecturer.id
+      });
+      await storage.createCourse({
+        code: "ENG202",
+        name: "Advanced Engineering",
+        lecturerId: lecturer.id
+      });
     }
 
     // Seed Students (Unregistered)
@@ -373,7 +373,7 @@ async function seedDatabase() {
       password: null,
       isRegistered: false
     });
-    
+
     // Seed a registered student for easy testing
     const stuPass = await hashPassword("student123");
     await storage.createStudent({
@@ -382,7 +382,7 @@ async function seedDatabase() {
       password: stuPass,
       isRegistered: true
     });
-    
+
     console.log("Seeding complete.");
   }
 }

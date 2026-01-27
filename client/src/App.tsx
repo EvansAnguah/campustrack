@@ -9,9 +9,37 @@ import AuthPage from "@/pages/auth-page";
 import StudentDashboard from "@/pages/student-dashboard";
 import LecturerDashboard from "@/pages/lecturer-dashboard";
 import LecturerStudents from "@/pages/lecturer-students";
+import LecturerManagement from "@/pages/lecturer-management";
 import NotFound from "@/pages/not-found";
 
-function PrivateRoute() {
+function Router() {
+  return (
+    <Switch>
+      <Route path="/auth" component={AuthPage} />
+
+      {/* Student Routes */}
+      <Route path="/">
+        {() => <PrivateRoute Component={StudentDashboard} roleRequired="any" />}
+      </Route>
+
+      {/* Lecturer Routes - Explicit paths for deep linking */}
+      <Route path="/dashboard">
+        {() => <PrivateRoute Component={LecturerDashboard} roleRequired="lecturer" />}
+      </Route>
+      <Route path="/students">
+        {() => <PrivateRoute Component={LecturerStudents} roleRequired="lecturer" />}
+      </Route>
+      <Route path="/lecturers">
+        {() => <PrivateRoute Component={LecturerManagement} roleRequired="lecturer" />}
+      </Route>
+
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+// Wrapper for protected routes to handle access control
+function PrivateRoute({ Component, roleRequired }: { Component: React.ComponentType, roleRequired: 'student' | 'lecturer' | 'any' }) {
   const { user, role, isLoading } = useAuth();
 
   if (isLoading) {
@@ -29,31 +57,22 @@ function PrivateRoute() {
     return <Redirect to="/auth" />;
   }
 
-  if (role === "student") {
-    return <StudentDashboard />;
+  // If attempting to access a lecturer route but user is a student
+  if (roleRequired === 'lecturer' && role !== 'lecturer') {
+    return <Redirect to="/" />;
   }
 
-  if (role === "lecturer") {
-    // Current simple router doesn't handle subpaths easily without context
-    // We'll rely on the main Router to handle switching between dashboards
-    return <Switch>
-      <Route path="/" component={LecturerDashboard} />
-      <Route path="/students" component={LecturerStudents} />
-      <Route component={() => <Redirect to="/" />} />
-    </Switch>;
+  // If user is a lecturer at root, redirect to dashboard
+  if (role === 'lecturer' && window.location.pathname === '/') {
+    return <Redirect to="/dashboard" />;
   }
 
-  return <Redirect to="/auth" />;
-}
+  // If user is a student at root, show student dashboard
+  if (role === 'student' && window.location.pathname === '/') {
+    return <Component />;
+  }
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/auth" component={AuthPage} />
-      <Route path="/" component={PrivateRoute} />
-      <Route component={NotFound} />
-    </Switch>
-  );
+  return <Component />;
 }
 
 function App() {

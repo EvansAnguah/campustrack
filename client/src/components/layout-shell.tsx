@@ -38,6 +38,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
                     <Users className="w-4 h-4 mr-2" /> Students
                   </Button>
                 </Link>
+                <Link href="/lecturers">
+                  <Button variant={location === "/lecturers" ? "white" : "ghost"} size="sm" className={location === "/lecturers" ? "bg-white shadow-sm" : ""}>
+                    <Users className="w-4 h-4 mr-2" /> Lecturers
+                  </Button>
+                </Link>
               </nav>
             )}
           </div>
@@ -74,6 +79,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           <Link href="/students" className="flex-1">
             <Button variant={location === "/students" ? "secondary" : "ghost"} size="sm" className="w-full justify-start">
               <Users className="w-4 h-4 mr-2" /> Students
+            </Button>
+          </Link>
+          <Link href="/lecturers" className="flex-1">
+            <Button variant={location === "/lecturers" ? "secondary" : "ghost"} size="sm" className="w-full justify-start">
+              <Users className="w-4 h-4 mr-2" /> Lecturers
             </Button>
           </Link>
         </div>

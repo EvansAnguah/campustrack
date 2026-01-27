@@ -1,10 +1,10 @@
 import { db } from "./db";
-import { 
+import {
   students, lecturers, courses, attendanceSessions, attendanceRecords, userSessions,
   type Student, type Lecturer, type Course, type AttendanceSession, type AttendanceRecord,
   type InsertStudent, type InsertLecturer, type InsertCourse, type InsertSession, type InsertRecord
 } from "@shared/schema";
-import { eq, and, gt, isNull } from "drizzle-orm";
+import { eq, and, gt, isNull, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Students
@@ -12,7 +12,7 @@ export interface IStorage {
   getStudent(id: number): Promise<Student | undefined>;
   createStudent(student: InsertStudent): Promise<Student>;
   updateStudentPassword(id: number, hash: string): Promise<Student>;
-  
+
   // Lecturers
   getLecturerByUsername(username: string): Promise<Lecturer | undefined>;
   getLecturer(id: number): Promise<Lecturer | undefined>;
@@ -51,7 +51,7 @@ export class DatabaseStorage implements IStorage {
     const [student] = await db.select().from(students).where(eq(students.indexNumber, indexNumber));
     return student;
   }
-  
+
   async getStudent(id: number): Promise<Student | undefined> {
     const [student] = await db.select().from(students).where(eq(students.id, id));
     return student;
@@ -121,13 +121,13 @@ export class DatabaseStorage implements IStorage {
       session: attendanceSessions,
       course: courses
     })
-    .from(attendanceSessions)
-    .innerJoin(courses, eq(attendanceSessions.courseId, courses.id))
-    .where(and(
-      eq(attendanceSessions.isActive, true),
-      // Optional: check endTime if strictly enforced by DB query, otherwise logic is in route
-    ));
-    
+      .from(attendanceSessions)
+      .innerJoin(courses, eq(attendanceSessions.courseId, courses.id))
+      .where(and(
+        eq(attendanceSessions.isActive, true),
+        // Optional: check endTime if strictly enforced by DB query, otherwise logic is in route
+      ));
+
     return results.map(r => ({ ...r.session, course: r.course }));
   }
 
@@ -160,11 +160,11 @@ export class DatabaseStorage implements IStorage {
       session: attendanceSessions,
       course: courses
     })
-    .from(attendanceRecords)
-    .innerJoin(attendanceSessions, eq(attendanceRecords.sessionId, attendanceSessions.id))
-    .innerJoin(courses, eq(attendanceSessions.courseId, courses.id))
-    .where(eq(attendanceRecords.studentId, studentId))
-    .orderBy(attendanceRecords.timestamp);
+      .from(attendanceRecords)
+      .innerJoin(attendanceSessions, eq(attendanceRecords.sessionId, attendanceSessions.id))
+      .innerJoin(courses, eq(attendanceSessions.courseId, courses.id))
+      .where(eq(attendanceRecords.studentId, studentId))
+      .orderBy(attendanceRecords.timestamp);
 
     return results.map(r => ({ ...r.record, session: r.session, course: r.course }));
   }
@@ -174,9 +174,9 @@ export class DatabaseStorage implements IStorage {
       record: attendanceRecords,
       student: students
     })
-    .from(attendanceRecords)
-    .innerJoin(students, eq(attendanceRecords.studentId, students.id))
-    .where(eq(attendanceRecords.sessionId, sessionId));
+      .from(attendanceRecords)
+      .innerJoin(students, eq(attendanceRecords.studentId, students.id))
+      .where(eq(attendanceRecords.sessionId, sessionId));
 
     return results.map(r => ({ ...r.record, student: r.student }));
   }
@@ -185,7 +185,7 @@ export class DatabaseStorage implements IStorage {
   async createUserSession(userId: number, userType: 'student' | 'lecturer', deviceId: string): Promise<void> {
     // Invalidate any existing active sessions for this user
     await this.invalidateUserSession(userId, userType);
-    
+
     await db.insert(userSessions).values({
       userId,
       userType,
@@ -262,7 +262,7 @@ export class DatabaseStorage implements IStorage {
       // If there is an active session, show status for it
       const records = await db.select().from(attendanceRecords).where(eq(attendanceRecords.sessionId, activeSession.id));
       const attendedIds = new Set(records.map(r => r.studentId));
-      
+
       return (await this.getAllStudents()).map(s => ({
         studentId: s.id,
         status: attendedIds.has(s.id) ? 'attended' : 'absent',

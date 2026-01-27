@@ -33,8 +33,8 @@ export default function LecturerStudents() {
     }
   };
 
-  const filteredStudents = students?.filter(s => 
-    s.student.name.toLowerCase().includes(search.toLowerCase()) || 
+  const filteredStudents = students?.filter(s =>
+    s.student.name.toLowerCase().includes(search.toLowerCase()) ||
     s.student.indexNumber.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -80,9 +80,9 @@ export default function LecturerStudents() {
             <div className="flex items-center justify-between gap-4">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input 
-                  placeholder="Search students..." 
-                  className="pl-9" 
+                <Input
+                  placeholder="Search students..."
+                  className="pl-9"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -116,7 +116,7 @@ export default function LecturerStudents() {
                 <TableBody>
                   <AnimatePresence>
                     {filteredStudents?.map((s) => (
-                      <motion.tr 
+                      <motion.tr
                         key={s.student.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -124,19 +124,17 @@ export default function LecturerStudents() {
                       >
                         <TableCell>
                           <div className="flex items-center justify-center">
-                            <Circle className={`w-3 h-3 ${
-                              s.status === 'attended' ? 'fill-green-500 text-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' :
-                              s.status === 'absent' ? 'fill-red-500 text-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' :
-                              'fill-slate-200 text-slate-200'
-                            } transition-all duration-500`} />
+                            <Circle className={`w-3 h-3 ${s.status === 'attended' ? 'fill-green-500 text-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' :
+                                s.status === 'absent' ? 'fill-red-500 text-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' :
+                                  'fill-slate-200 text-slate-200'
+                              } transition-all duration-500`} />
                           </div>
                         </TableCell>
                         <TableCell className="font-mono text-sm font-medium">{s.student.indexNumber}</TableCell>
                         <TableCell className="font-semibold text-slate-900">{s.student.name}</TableCell>
                         <TableCell className="text-right">
-                          <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${
-                            s.student.isRegistered ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'
-                          }`}>
+                          <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${s.student.isRegistered ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'
+                            }`}>
                             {s.student.isRegistered ? 'Active' : 'Pending'}
                           </span>
                         </TableCell>

@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { 
-  insertSessionSchema, 
-  insertCourseSchema, 
-  attendanceSessions, 
+import {
+  insertSessionSchema,
+  insertCourseSchema,
+  attendanceSessions,
   attendanceRecords,
   courses,
   students,
@@ -36,7 +36,7 @@ export const api = {
       path: '/api/auth/login',
       input: loginSchema,
       responses: {
-        200: z.object({ 
+        200: z.object({
           user: z.union([z.custom<typeof students.$inferSelect>(), z.custom<typeof courses.$inferSelect>()]), // Generic user object
           role: z.enum(['student', 'lecturer']),
           token: z.string().optional() // If using tokens, otherwise session cookie
@@ -66,7 +66,7 @@ export const api = {
       method: 'GET' as const,
       path: '/api/auth/me',
       responses: {
-        200: z.object({ 
+        200: z.object({
           user: z.any(), // Polymorphic user
           role: z.enum(['student', 'lecturer'])
         }).nullable(),
@@ -199,6 +199,21 @@ export const api = {
           errors: z.array(z.string()),
         }),
         401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  lecturers: {
+    create: {
+      method: 'POST' as const,
+      path: '/api/lecturers',
+      input: z.object({
+        name: z.string(),
+        username: z.string(),
+        password: z.string().min(6),
+      }),
+      responses: {
+        201: z.custom<typeof students.$inferSelect>(), // Using generic user type, reusing existing schema import
+        409: z.object({ message: z.string() }),
       },
     },
   },

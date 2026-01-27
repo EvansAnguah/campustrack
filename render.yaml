@@ -1,0 +1,29 @@
+# Render deployment configuration
+# https://render.com
+
+services:
+  # Web Service (Express + React)
+  - type: web
+    name: campustrack
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: campustrack-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: PORT
+        value: 5000
+
+  # PostgreSQL Database
+  - type: pserv
+    name: campustrack-db
+    env: postgresql
+    plan: free
+    ipAllowList: []

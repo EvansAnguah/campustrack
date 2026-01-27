@@ -118,5 +118,11 @@ Proceed in this order:
 4. Implement attendance logic
 5. Add UI enhancements last
 
+
+lecturer should know all students in the system. in a students page in the lecturer sidebar. so after every session or class, students who attended shows green light and others show red
+after one hour of closure the lights should go off
+
+lecturer can also add students manually through the system
+
 Do NOT jump ahead.
 
