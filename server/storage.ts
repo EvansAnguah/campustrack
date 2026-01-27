@@ -41,6 +41,8 @@ export interface IStorage {
   getActiveUserSession(userId: number, userType: 'student' | 'lecturer'): Promise<string | undefined>; // Returns deviceId
   invalidateUserSession(userId: number, userType: 'student' | 'lecturer'): Promise<void>;
   upsertStudent(indexNumber: string, name: string): Promise<{ type: 'added' | 'updated' | 'skipped' }>;
+  getAllStudents(): Promise<Student[]>;
+  getRecentAttendanceStatuses(): Promise<{ studentId: number, status: 'attended' | 'absent' | 'off', sessionId?: number }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -231,6 +233,58 @@ export class DatabaseStorage implements IStorage {
       isRegistered: false,
     });
     return { type: 'added' };
+  }
+
+  async getAllStudents(): Promise<Student[]> {
+    return await db.select().from(students).orderBy(students.name);
+  }
+
+  async getRecentAttendanceStatuses(): Promise<{ studentId: number, status: 'attended' | 'absent' | 'off', sessionId?: number }[]> {
+    // 1. Find the most recent closed session
+    const [latestSession] = await db.select()
+      .from(attendanceSessions)
+      .where(eq(attendanceSessions.isActive, false))
+      .orderBy(sql`${attendanceSessions.endTime} DESC`)
+      .limit(1);
+
+    if (!latestSession || !latestSession.endTime) {
+      // If no closed session exists, check for active session
+      const [activeSession] = await db.select()
+        .from(attendanceSessions)
+        .where(eq(attendanceSessions.isActive, true))
+        .orderBy(sql`${attendanceSessions.startTime} DESC`)
+        .limit(1);
+
+      if (!activeSession) {
+        return (await this.getAllStudents()).map(s => ({ studentId: s.id, status: 'off' }));
+      }
+
+      // If there is an active session, show status for it
+      const records = await db.select().from(attendanceRecords).where(eq(attendanceRecords.sessionId, activeSession.id));
+      const attendedIds = new Set(records.map(r => r.studentId));
+      
+      return (await this.getAllStudents()).map(s => ({
+        studentId: s.id,
+        status: attendedIds.has(s.id) ? 'attended' : 'absent',
+        sessionId: activeSession.id
+      }));
+    }
+
+    // 2. Check if the session ended more than 1 hour ago
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    if (new Date(latestSession.endTime) < oneHourAgo) {
+      return (await this.getAllStudents()).map(s => ({ studentId: s.id, status: 'off' }));
+    }
+
+    // 3. Otherwise, show who attended the latest session
+    const records = await db.select().from(attendanceRecords).where(eq(attendanceRecords.sessionId, latestSession.id));
+    const attendedIds = new Set(records.map(r => r.studentId));
+
+    return (await this.getAllStudents()).map(s => ({
+      studentId: s.id,
+      status: attendedIds.has(s.id) ? 'attended' : 'absent',
+      sessionId: latestSession.id
+    }));
   }
 }
 

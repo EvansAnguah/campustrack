@@ -159,6 +159,29 @@ export const api = {
     }
   },
   students: {
+    listWithStatus: {
+      method: 'GET' as const,
+      path: '/api/students/status',
+      responses: {
+        200: z.array(z.object({
+          student: z.custom<typeof students.$inferSelect>(),
+          status: z.enum(['attended', 'absent', 'off']),
+          lastSessionId: z.number().optional(),
+        })),
+      },
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/students',
+      input: z.object({
+        name: z.string(),
+        indexNumber: z.string(),
+      }),
+      responses: {
+        201: z.custom<typeof students.$inferSelect>(),
+        409: z.object({ message: z.string() }),
+      },
+    },
     import: {
       method: 'POST' as const,
       path: '/api/students/import',

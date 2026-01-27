@@ -290,6 +290,40 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  app.get(api.students.listWithStatus.path, requireAuth, requireLecturer, async (req, res) => {
+    const statuses = await storage.getRecentAttendanceStatuses();
+    const students = await storage.getAllStudents();
+    
+    const result = students.map(student => {
+      const statusData = statuses.find(s => s.studentId === student.id);
+      return {
+        student,
+        status: statusData?.status || 'off',
+        lastSessionId: statusData?.sessionId
+      };
+    });
+    
+    res.json(result);
+  });
+
+  app.post(api.students.create.path, requireAuth, requireLecturer, async (req, res) => {
+    try {
+      const input = api.students.create.input.parse(req.body);
+      const existing = await storage.getStudentByIndex(input.indexNumber);
+      if (existing) {
+        return res.status(409).json({ message: "Student with this Index Number already exists" });
+      }
+      const student = await storage.createStudent({
+        ...input,
+        password: null,
+        isRegistered: false
+      });
+      res.status(201).json(student);
+    } catch (err) {
+      res.status(400).json({ message: "Invalid data" });
+    }
+  });
+
   // === SEED DATA ===
   await seedDatabase();
 

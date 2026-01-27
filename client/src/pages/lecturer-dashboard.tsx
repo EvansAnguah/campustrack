@@ -163,60 +163,61 @@ export default function LecturerDashboard() {
                   <DialogDescription>Set location and range for student verification.</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
-                <div className="space-y-2">
-                  <Label>Select Course</Label>
-                  <Select onValueChange={setSelectedCourse}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a course..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {courses?.map((c) => (
-                        <SelectItem key={c.id} value={c.id.toString()}>
-                          {c.code} - {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <Label>Allowed Radius (meters)</Label>
-                    <span className="text-sm font-mono font-bold text-primary">{radius[0]}m</span>
+                  <div className="space-y-2">
+                    <Label>Select Course</Label>
+                    <Select onValueChange={setSelectedCourse}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a course..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {courses?.map((c) => (
+                          <SelectItem key={c.id} value={c.id.toString()}>
+                            {c.code} - {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Slider value={radius} onValueChange={setRadius} min={10} max={500} step={10} />
-                  <p className="text-xs text-slate-500">Students must be within this distance from your current location.</p>
-                </div>
 
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary" /> Location Source
-                    </Label>
-                    {coords && <span className="text-xs text-green-600 font-medium">Locked ✓</span>}
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <Label>Allowed Radius (meters)</Label>
+                      <span className="text-sm font-mono font-bold text-primary">{radius[0]}m</span>
+                    </div>
+                    <Slider value={radius} onValueChange={setRadius} min={10} max={500} step={10} />
+                    <p className="text-xs text-slate-500">Students must be within this distance from your current location.</p>
                   </div>
-                  <Button
-                    variant={coords ? "outline" : "secondary"}
-                    className="w-full"
-                    onClick={handleGetLocation}
-                    disabled={isLocating}
-                  >
-                    {isLocating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <MapPin className="w-4 h-4 mr-2" />}
-                    {coords ? "Update Location" : "Get Current Location"}
+
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-primary" /> Location Source
+                      </Label>
+                      {coords && <span className="text-xs text-green-600 font-medium">Locked ✓</span>}
+                    </div>
+                    <Button
+                      variant={coords ? "outline" : "secondary"}
+                      className="w-full"
+                      onClick={handleGetLocation}
+                      disabled={isLocating}
+                    >
+                      {isLocating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <MapPin className="w-4 h-4 mr-2" />}
+                      {coords ? "Update Location" : "Get Current Location"}
+                    </Button>
+                    {coords && (
+                      <p className="text-xs text-center font-mono text-slate-400">
+                        {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+                      </p>
+                    )}
+                  </div>
+
+                  <Button className="w-full" onClick={handleCreateSession} disabled={!selectedCourse || !coords || createSession.isPending}>
+                    {createSession.isPending ? "Creating..." : "Launch Session"}
                   </Button>
-                  {coords && (
-                    <p className="text-xs text-center font-mono text-slate-400">
-                      {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
-                    </p>
-                  )}
                 </div>
-
-                <Button className="w-full" onClick={handleCreateSession} disabled={!selectedCourse || !coords || createSession.isPending}>
-                  {createSession.isPending ? "Creating..." : "Launch Session"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Active Sessions Grid */}

@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import AuthPage from "@/pages/auth-page";
 import StudentDashboard from "@/pages/student-dashboard";
 import LecturerDashboard from "@/pages/lecturer-dashboard";
+import LecturerStudents from "@/pages/lecturer-students";
 import NotFound from "@/pages/not-found";
 
 function PrivateRoute() {
@@ -33,7 +34,13 @@ function PrivateRoute() {
   }
 
   if (role === "lecturer") {
-    return <LecturerDashboard />;
+    // Current simple router doesn't handle subpaths easily without context
+    // We'll rely on the main Router to handle switching between dashboards
+    return <Switch>
+      <Route path="/" component={LecturerDashboard} />
+      <Route path="/students" component={LecturerStudents} />
+      <Route component={() => <Redirect to="/" />} />
+    </Switch>;
   }
 
   return <Redirect to="/auth" />;
