@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth-context";
 import { Button } from "@/components/ui/button";
-import { LogOut, GraduationCap, MapPin, Users, LayoutDashboard } from "lucide-react";
+import { LogOut, GraduationCap, MapPin, Users, LayoutDashboard, BookOpen } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
@@ -31,6 +31,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
                 <Link href="/">
                   <Button variant={location === "/" ? "white" : "ghost"} size="sm" className={location === "/" ? "bg-white shadow-sm" : ""}>
                     <LayoutDashboard className="w-4 h-4 mr-2" /> Sessions
+                  </Button>
+                </Link>
+                <Link href="/courses">
+                  <Button variant={location === "/courses" ? "white" : "ghost"} size="sm" className={location === "/courses" ? "bg-white shadow-sm" : ""}>
+                    <BookOpen className="w-4 h-4 mr-2" /> Courses
                   </Button>
                 </Link>
                 <Link href="/students">
@@ -74,6 +79,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           <Link href="/" className="flex-1">
             <Button variant={location === "/" ? "secondary" : "ghost"} size="sm" className="w-full justify-start">
               <LayoutDashboard className="w-4 h-4 mr-2" /> Sessions
+            </Button>
+          </Link>
+          <Link href="/courses" className="flex-1">
+            <Button variant={location === "/courses" ? "secondary" : "ghost"} size="sm" className="w-full justify-start">
+              <BookOpen className="w-4 h-4 mr-2" /> Courses
             </Button>
           </Link>
           <Link href="/students" className="flex-1">

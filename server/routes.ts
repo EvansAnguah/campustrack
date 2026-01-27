@@ -170,10 +170,28 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post(api.courses.create.path, requireAuth, requireLecturer, async (req, res) => {
     try {
       const input = api.courses.create.input.parse(req.body);
-      const course = await storage.createCourse(input);
+      const lecturerId = req.session.user!.id; // Safe because of requireLecturer middleware
+      const course = await storage.createCourse({ ...input, lecturerId });
       res.status(201).json(course);
     } catch (err) {
       res.status(400).json({ message: "Validation error" });
+    }
+  });
+
+  app.delete(api.courses.delete.path, requireAuth, requireLecturer, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const course = await storage.getCourse(id);
+      if (!course) return res.status(404).json({ message: "Course not found" });
+
+      // Optional: Check if lecturer owns the course?
+      // const user = req.session.user;
+      // if (course.lecturerId !== user.id) return res.status(403).json({ message: "Not authorized" });
+
+      await storage.deleteCourse(id);
+      res.json({ message: "Course deleted" });
+    } catch (err) {
+      res.status(500).json({ message: "Server error" });
     }
   });
 

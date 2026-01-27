@@ -10,6 +10,7 @@ import StudentDashboard from "@/pages/student-dashboard";
 import LecturerDashboard from "@/pages/lecturer-dashboard";
 import LecturerStudents from "@/pages/lecturer-students";
 import LecturerManagement from "@/pages/lecturer-management";
+import CourseManagement from "@/pages/course-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -31,6 +32,9 @@ function Router() {
       </Route>
       <Route path="/lecturers">
         {() => <PrivateRoute Component={LecturerManagement} roleRequired="lecturer" />}
+      </Route>
+      <Route path="/courses">
+        {() => <PrivateRoute Component={CourseManagement} roleRequired="lecturer" />}
       </Route>
 
       <Route component={NotFound} />
