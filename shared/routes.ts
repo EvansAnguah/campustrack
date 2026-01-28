@@ -84,12 +84,21 @@ export const api = {
     create: {
       method: 'POST' as const,
       path: '/api/courses',
-      input: insertCourseSchema,
+      input: insertCourseSchema.omit({ lecturerId: true }),
       responses: {
         201: z.custom<typeof courses.$inferSelect>(),
+        90: z.object({ message: z.string() }), // Generic error type if unauthorized
         401: errorSchemas.unauthorized,
       },
-    }
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/courses/:id',
+      responses: {
+        200: z.object({ message: z.string() }),
+        404: errorSchemas.notFound,
+      },
+    },
   },
   sessions: {
     listActive: {

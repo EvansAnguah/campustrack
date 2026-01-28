@@ -324,6 +324,28 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(result);
   });
 
+  app.post(api.lecturers.create.path, requireAuth, requireLecturer, async (req, res) => {
+    try {
+      const input = api.lecturers.create.input.parse(req.body);
+      const existing = await storage.getLecturerByUsername(input.username);
+      if (existing) {
+        return res.status(409).json({ message: "Username already taken" });
+      }
+      const hashedPassword = await hashPassword(input.password);
+      const lecturer = await storage.createLecturer({
+        ...input,
+        password: hashedPassword,
+      });
+      res.status(201).json(lecturer);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        res.status(400).json({ message: err.errors[0].message });
+      } else {
+        res.status(500).json({ message: "Server error" });
+      }
+    }
+  });
+
   app.post(api.students.create.path, requireAuth, requireLecturer, async (req, res) => {
     try {
       const input = api.students.create.input.parse(req.body);
