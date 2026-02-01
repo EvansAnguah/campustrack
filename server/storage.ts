@@ -133,7 +133,7 @@ export class DatabaseStorage implements IStorage {
         // Optional: check endTime if strictly enforced by DB query, otherwise logic is in route
       ));
 
-    return results.map(r => ({ ...r.session, course: r.course }));
+    return results.map(r => ({ session: r.session, course: r.course }));
   }
 
   async stopSession(id: number): Promise<AttendanceSession> {
@@ -171,7 +171,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(attendanceRecords.studentId, studentId))
       .orderBy(attendanceRecords.timestamp);
 
-    return results.map(r => ({ ...r.record, session: r.session, course: r.course }));
+    return results.map(r => ({ record: r.record, session: r.session, course: r.course }));
   }
 
   async getSessionRecords(sessionId: number): Promise<(AttendanceRecord & { student: Student })[]> {
@@ -183,7 +183,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(students, eq(attendanceRecords.studentId, students.id))
       .where(eq(attendanceRecords.sessionId, sessionId));
 
-    return results.map(r => ({ ...r.record, student: r.student }));
+    return results.map(r => ({ record: r.record, student: r.student }));
   }
 
   // User Sessions (Device Control)
